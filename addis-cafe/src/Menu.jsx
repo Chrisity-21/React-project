@@ -1,4 +1,5 @@
 import MenuItem from "./MenuItem"
+import {useState} from "react"
 import caffelatteImage from "./assets/cafelatte.jpg";
 import bunaImage from "./assets/buna.jpeg";
 import MacchiatoImage from "./assets/Macchiato.jpg";
@@ -7,8 +8,9 @@ import AvocadoImage from "./assets/Avocado.jpg";
 import fantaImage from "./assets/fanta.jpeg";
 import applejuiceImage from "./assets/applejuice.webp";
 import freshfruitImage from "./assets/freshfruit.jpg";
-
-
+import Category from "./Category";
+import Order from "./Order";
+import OrderForm from "./OrderForm";
 const menu = [
     {
       id: 1,
@@ -77,23 +79,47 @@ const menu = [
   ];
 
   function Menu(){
+    const [selectedCategory, setSelectedCategory] = useState("All")
+    const categories = ["All", "Hot Drink", "Juice", "Soda", "Special"];
+    const [quantities, setQuantities] = useState({});
+    function handleAdd(id) {
+        setQuantities((current) => ({
+          ...current,
+          [id]: (current[id] || 0) + 1
+        }));
+      }
+      const total = menu.reduce((sum, item) => {
+        return sum + item.price * (quantities[item.id] || 0);
+      }, 0);
+    const filteredMenu =
+  selectedCategory === "All"
+    ? menu
+    : menu.filter((item) => item.category === selectedCategory);
   return(
-    <section id="menu" className="menu">
-       {menu.map((item) => {
+    <section id="menu">
+        <Category
+  categories={categories}
+  selectedCategory={selectedCategory}
+  onSelect={setSelectedCategory}
+/>
+<Order total={total} />
+<div className="menu">
+{filteredMenu.map((item) => {
         return(
             <MenuItem
             key = {item.id}
             name = {item.name}
             price = {item.price}
             description={item.description}
-            category={item.category}
             image={item.image}
+            quantity={quantities[item.id] || 0}
+onAdd={() => handleAdd(item.id)}
             />
         )
        })}
-
+</div>
+<OrderForm/>
     </section>
   )
   }
-
   export default Menu;
